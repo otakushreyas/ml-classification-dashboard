@@ -159,7 +159,7 @@ def load_default_dataset():
 # ─────────────────────────────────────────────────────────────────────────────
 MODEL_REGISTRY = {
     "Logistic Regression": lambda: LogisticRegression(
-        max_iter=2000, multi_class="multinomial", solver="lbfgs", random_state=42
+        max_iter=2000, solver="lbfgs", random_state=42
     ),
     "Decision Tree": lambda: DecisionTreeClassifier(
         max_depth=10, min_samples_split=5, random_state=42
