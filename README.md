@@ -42,9 +42,7 @@ The following 5 classification models are implemented and evaluated:
 | Decision Tree | 0.5600 | 0.7129 | 0.5517 | 0.5600 | 0.5522 | 0.3336 |
 | K-Nearest Neighbors | 0.6531 | 0.8359 | 0.6452 | 0.6531 | 0.6457 | 0.4739 |
 | Naive Bayes (Gaussian) | 0.3215 | 0.5966 | 0.4207 | 0.3215 | 0.3621 | 0.0996 |
-| Random Forest (Ensemble) | *(Add value)* | *(Add value)* | *(Add value)* | *(Add value)* | *(Add value)* | *(Add value)* |
-
-> *(Add Random Forest values from the All-Model Comparison table)*
+| Random Forest (Ensemble) | 0.6800 | 0.8535 | 0.6849 | 0.6800 | 0.6660 | 0.5065 |
 
 ### Observations
 
@@ -54,8 +52,8 @@ The following 5 classification models are implemented and evaluated:
 | Decision Tree | Slightly better accuracy than Logistic Regression (0.5600) but lower AUC. Shows signs of potential overfitting; tuning hyperparameters could help improve generalization. |
 | K-Nearest Neighbors | **Best performer** with highest accuracy (0.6531), best F1 score (0.6457), and excellent AUC (0.8359). Demonstrates strong and consistent performance across all evaluation metrics. |
 | Naive Bayes (Gaussian) | Poorest performance across all metrics. Very low accuracy (0.3215) and MCC (0.0996) suggest that Naive Bayes assumptions are not well-suited for this dataset's feature distributions. |
-| Random Forest (Ensemble) | *(Add observation after obtaining results)* |
-| **Overall Winner** | **K-Nearest Neighbors** – Consistently superior performance with highest accuracy, F1 score, and AUC, making it the most reliable model for this classification task. |
+| Random Forest (Ensemble) | Strong performer with 0.68 accuracy and excellent AUC (0.8535). Higher MCC (0.5065) compared to other models indicates better overall classification quality. Balanced precision and recall suggest good generalization. |
+| **Overall Winner** | **K-Nearest Neighbors** ⭐ – Highest accuracy (0.6531) and F1 score (0.6457) make it the most reliable model for this classification task, though Random Forest is a close second with better MCC. |
 
 ## How to Run Locally
 
