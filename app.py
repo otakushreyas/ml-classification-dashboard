@@ -1,14 +1,16 @@
 """
 app.py – Streamlit Web Application
 ====================================
-Interactive ML Classification Dashboard for Wine Quality Prediction.
+Interactive ML Classification Dashboard with flexible dataset support.
 
 Features:
-  • CSV dataset upload (test data)
+  • CSV dataset upload (any dataset with any columns)
+  • Automatic target column detection (uses last column as target)
   • Model selection dropdown (5 classifiers)
   • Evaluation metrics display (Accuracy, AUC, Precision, Recall, F1, MCC)
   • Confusion matrix heatmap & classification report
   • Side-by-side model comparison
+  • Works with any classification dataset!
 """
 
 import streamlit as st
@@ -38,11 +40,26 @@ from sklearn.metrics import (
 warnings.filterwarnings("ignore")
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Helper: Detect target column
+# ─────────────────────────────────────────────────────────────────────────────
+def detect_target_column(df):
+    """
+    Automatically detect the target column from the dataset.
+    Uses the last column as the target column.
+    
+    Returns: (target_column_name, features_df, target_series)
+    """
+    target_col = df.columns[-1]
+    features = df.drop(target_col, axis=1)
+    target = df[target_col]
+    return target_col, features, target
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Page Configuration
 # ─────────────────────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="ML Classification Dashboard – Wine Quality",
-    page_icon="🍷",
+    page_title="ML Classification Dashboard",
+    page_icon="🤖",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -185,15 +202,54 @@ def train_all_models(_X_train, _y_train):
     return trained
 
 
+def compute_auc(model, X_test, y_test):
+    """Compute AUC safely for both binary and multiclass targets."""
+    try:
+        if hasattr(model, "predict_proba"):
+            y_prob = model.predict_proba(X_test)
+            if y_prob.ndim == 2 and y_prob.shape[1] == 2:
+                return roc_auc_score(y_test, y_prob[:, 1])
+            if y_prob.ndim == 2 and y_prob.shape[1] > 2:
+                return roc_auc_score(
+                    y_test,
+                    y_prob,
+                    multi_class="ovr",
+                    average="weighted",
+                    labels=np.unique(y_test),
+                )
+
+        if hasattr(model, "decision_function"):
+            y_score = model.decision_function(X_test)
+            if y_score.ndim == 2 and y_score.shape[1] == 2:
+                return roc_auc_score(y_test, y_score[:, 1])
+            if y_score.ndim == 2 and y_score.shape[1] > 2:
+                return roc_auc_score(
+                    y_test,
+                    y_score,
+                    multi_class="ovr",
+                    average="weighted",
+                    labels=np.unique(y_test),
+                )
+
+        return float("nan")
+    except Exception:
+        return float("nan")
+
+
+def get_class_labels(y):
+    """Return readable labels for binary wine targets and generic numeric classes."""
+    unique_vals = sorted(pd.Series(y).dropna().unique().tolist())
+    if unique_vals == [0, 1]:
+        return ["Red Wine", "White Wine"]
+    return [str(v) for v in unique_vals]
+
+
 def compute_metrics(model, X_test, y_test):
     """Return dict of all 6 metrics + confusion matrix + classification report."""
     y_pred = model.predict(X_test)
-
-    try:
-        y_prob = model.predict_proba(X_test)
-        auc = roc_auc_score(y_test, y_prob, multi_class="ovr", average="weighted")
-    except Exception:
-        auc = float("nan")
+    auc = compute_auc(model, X_test, y_test)
+    class_labels = get_class_labels(y_test)
+    class_values = np.unique(y_test)
 
     metrics = {
         "Accuracy": accuracy_score(y_test, y_pred),
@@ -204,9 +260,22 @@ def compute_metrics(model, X_test, y_test):
         "MCC": matthews_corrcoef(y_test, y_pred),
     }
 
-    cm = confusion_matrix(y_test, y_pred)
-    report = classification_report(y_test, y_pred, zero_division=0, output_dict=True)
-    report_text = classification_report(y_test, y_pred, zero_division=0)
+    cm = confusion_matrix(y_test, y_pred, labels=class_values)
+    report = classification_report(
+        y_test,
+        y_pred,
+        labels=class_values,
+        target_names=class_labels,
+        zero_division=0,
+        output_dict=True,
+    )
+    report_text = classification_report(
+        y_test,
+        y_pred,
+        labels=class_values,
+        target_names=class_labels,
+        zero_division=0,
+    )
 
     return metrics, cm, report, report_text, y_pred
 
@@ -216,10 +285,10 @@ def compute_metrics(model, X_test, y_test):
 # ─────────────────────────────────────────────────────────────────────────────
 with st.sidebar:
     st.image(
-        "https://img.icons8.com/fluency/96/wine-glass.png",
+        "https://img.icons8.com/fluency/96/machine-learning.png",
         width=64,
     )
-    st.markdown("## 🍷 Wine Quality ML")
+    st.markdown("## 🤖 ML Classification")
     st.markdown("---")
 
     # --- Dataset upload ---
@@ -227,8 +296,8 @@ with st.sidebar:
     uploaded_file = st.file_uploader(
         "Upload test CSV (optional)",
         type=["csv"],
-        help="Upload a CSV file with the same columns as the Wine Quality dataset. "
-             "If not uploaded, the built-in UCI dataset is used.",
+        help="Upload a CSV file with any columns. The LAST column will be used as the target variable. "
+             "If not uploaded, the built-in Wine Quality dataset is used.",
     )
 
     st.markdown("---")
@@ -258,10 +327,10 @@ with st.sidebar:
 
 # Hero banner
 st.markdown(
-    """
+    f"""
     <div class="hero-banner">
-        <h1>🍷 Wine Quality Classification Dashboard</h1>
-        <p>Multi-class classification using 5 ML models &nbsp;•&nbsp; 12 features &nbsp;•&nbsp; 6 497 samples</p>
+        <h1>🤖 ML Classification Dashboard</h1>
+        <p>Multi-class classification with flexible datasets &nbsp;•&nbsp; 5 ML models &nbsp;•&nbsp; Automatic feature detection</p>
     </div>
     """,
     unsafe_allow_html=True,
@@ -273,9 +342,8 @@ full_df = load_default_dataset()
 if full_df is None:
     st.stop()
 
-# Split full data into train/test for model training
-X_full = full_df.drop("quality", axis=1)
-y_full = full_df["quality"]
+# Automatically detect target column
+target_col, X_full, y_full = detect_target_column(full_df)
 
 X_train, X_test_default, y_train, y_test_default = train_test_split(
     X_full, y_full, test_size=0.2, random_state=42, stratify=y_full
@@ -296,12 +364,15 @@ if uploaded_file is not None:
         user_df = pd.read_csv(uploaded_file)
         user_df.columns = [c.strip().replace(" ", "_") for c in user_df.columns]
 
-        if "quality" not in user_df.columns:
-            st.error("❌ Uploaded CSV must contain a 'quality' column as the target.")
+        # Detect target column in user dataset
+        user_target_col, user_X, user_y = detect_target_column(user_df)
+        
+        if len(user_X.columns) == 0:
+            st.error("❌ Uploaded CSV must contain at least one feature column and one target column.")
             st.stop()
 
-        X_user = user_df.drop("quality", axis=1)
-        y_user = user_df["quality"]
+        X_user = user_X
+        y_user = user_y
 
         # Ensure same columns
         missing = set(feature_cols) - set(X_user.columns)
@@ -332,7 +403,7 @@ with st.spinner("Training models... (cached after first run)"):
 col_info1, col_info2, col_info3, col_info4 = st.columns(4)
 col_info1.metric("📊 Total Samples", f"{len(full_df):,}")
 col_info2.metric("🎯 Features", len(feature_cols))
-col_info3.metric("🏷️ Classes", len(full_df["quality"].unique()))
+col_info3.metric("🏷️ Classes", len(y_full.unique()))
 col_info4.metric("📁 Data Source", data_source.split("(")[0].strip())
 
 if show_data_preview:
@@ -388,7 +459,7 @@ with col_cm:
     fig_cm.patch.set_facecolor("#0e1117")
     ax_cm.set_facecolor("#0e1117")
 
-    classes = sorted(y_test_eval.unique())
+    classes = get_class_labels(y_test_eval)
     sns.heatmap(
         cm,
         annot=True,
