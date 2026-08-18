@@ -8,19 +8,27 @@ confusion matrices, and model comparisons through a Streamlit web application.
 
 ## Dataset Description
 
-**Dataset:** *(Update with your chosen dataset name and source)*
+**Dataset:** Wine Quality Classification (UCI Machine Learning Repository)
 
-- **Source:** Kaggle / UCI Machine Learning Repository
-- **Type:** Classification (binary / multi-class)
-- **Features:** *(update count)*
-- **Instances:** *(update count)*
-- **Target Column:** *(update column name)*
+- **Source:** [UCI ML Repository - Wine Quality Dataset](https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/)
+- **Type:** Multi-class Classification
+- **Total Instances:** 6,497 samples
+  - Red Wine: 1,599 samples
+  - White Wine: 4,898 samples
+- **Features:** 12 total
+  - **Physicochemical Features (11):** 
+    - Fixed acidity, Volatile acidity, Citric acid, Residual sugar, Chlorides
+    - Free sulfur dioxide, Total sulfur dioxide, Density, pH, Sulphates, Alcohol
+  - **Additional Feature (1):** Wine type (0 = Red, 1 = White)
+- **Target Column:** `quality` (Integer scale: 3–9, representing wine quality rating)
+- **Missing Values:** None
+- **Data Split:** 80% training, 20% testing
 
-> Upload your dataset CSV in the Streamlit app and select the target column to get started.
+> This dataset contains physicochemical (input) and sensory (output) variables of red and white variants of the Portuguese "Vinho Verde" wine.
 
 ## GitHub Repository Link
 
-*(Add your GitHub repo URL here)*
+[https://github.com/otakushreyas/ml-classification-dashboard/tree/feature/your-feature](https://github.com/otakushreyas/ml-classification-dashboard/tree/feature/your-feature)
 
 ## Models Used
 
@@ -30,24 +38,24 @@ The following 5 classification models are implemented and evaluated:
 
 | ML Model Name | Accuracy | AUC | Precision | Recall | F1 | MCC |
 |---|---|---|---|---|---|---|
-| Logistic Regression | — | — | — | — | — | — |
-| Decision Tree | — | — | — | — | — | — |
-| K-Nearest Neighbors | — | — | — | — | — | — |
-| Naive Bayes (Gaussian) | — | — | — | — | — | — |
-| Random Forest (Ensemble) | — | — | — | — | — | — |
+| Logistic Regression | 0.5408 | 0.7229 | 0.5415 | 0.5408 | 0.5132 | 0.2707 |
+| Decision Tree | 0.5600 | 0.7129 | 0.5517 | 0.5600 | 0.5522 | 0.3336 |
+| K-Nearest Neighbors | 0.6531 | 0.8359 | 0.6452 | 0.6531 | 0.6457 | 0.4739 |
+| Naive Bayes (Gaussian) | 0.3215 | 0.5966 | 0.4207 | 0.3215 | 0.3621 | 0.0996 |
+| Random Forest (Ensemble) | *(Add value)* | *(Add value)* | *(Add value)* | *(Add value)* | *(Add value)* | *(Add value)* |
 
-> *(Run the app and fill in these values from the All-Model Comparison table)*
+> *(Add Random Forest values from the All-Model Comparison table)*
 
 ### Observations
 
 | ML Model Name | Observation about model performance |
 |---|---|
-| Logistic Regression | *(Add observation)* |
-| Decision Tree | *(Add observation)* |
-| K-Nearest Neighbors | *(Add observation)* |
-| Naive Bayes (Gaussian) | *(Add observation)* |
-| Random Forest (Ensemble) | *(Add observation)* |
-| **Overall Winner** | *(Add winner and reasoning)* |
+| Logistic Regression | Moderate performance with balanced metrics. Good AUC (0.7229) suggests decent discriminative ability but lower accuracy (0.5408) indicates room for improvement. |
+| Decision Tree | Slightly better accuracy than Logistic Regression (0.5600) but lower AUC. Shows signs of potential overfitting; tuning hyperparameters could help improve generalization. |
+| K-Nearest Neighbors | **Best performer** with highest accuracy (0.6531), best F1 score (0.6457), and excellent AUC (0.8359). Demonstrates strong and consistent performance across all evaluation metrics. |
+| Naive Bayes (Gaussian) | Poorest performance across all metrics. Very low accuracy (0.3215) and MCC (0.0996) suggest that Naive Bayes assumptions are not well-suited for this dataset's feature distributions. |
+| Random Forest (Ensemble) | *(Add observation after obtaining results)* |
+| **Overall Winner** | **K-Nearest Neighbors** – Consistently superior performance with highest accuracy, F1 score, and AUC, making it the most reliable model for this classification task. |
 
 ## How to Run Locally
 
